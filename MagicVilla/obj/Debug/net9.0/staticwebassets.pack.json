@@ -1,10 +1,6 @@
 {
   "Files": [
     {
-      "Id": "/Users/zahra.khodabakhshi/C#/MagicVilla_VilaAPI/MagicVilla/obj/Debug/net9.0/scopedcss/projectbundle/MagicVilla.bundle.scp.css",
-      "PackagePath": "staticwebassets/MagicVilla.e86nl7b1r0.bundle.scp.css"
-    },
-    {
       "Id": "/Users/zahra.khodabakhshi/C#/MagicVilla_VilaAPI/MagicVilla/wwwroot/css/site.css",
       "PackagePath": "staticwebassets/css/site.css"
     },

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MagicVilla")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2acbdbc8537e84aaddfc919fb54d63ef65ebd9e7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+be69eea629577236f878006f61a2758a4d6884f0")]
 [assembly: System.Reflection.AssemblyProductAttribute("MagicVilla")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MagicVilla")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

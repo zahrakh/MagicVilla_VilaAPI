@@ -1,5 +1,6 @@
 using MagicVilla.Data;
 using MagicVilla.Models.Dto;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MagicVilla.Controllers;
@@ -7,13 +8,14 @@ namespace MagicVilla.Controllers;
 //[Route("api/[controller]")]
 [Route("api/VillaAPI")]
 [ApiController]
-public class VillaApiController: ControllerBase
+public class VillaApiController(ILogger<VillaApiController> logger) : ControllerBase
 {
     /*Endpoint to get Villa List*/
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<VillaDTO>> GetVillas()
     {
+        logger.LogInformation("Get All the Villas");
         return Ok(VillaStore.villaList);
     }
 
@@ -27,6 +29,7 @@ public class VillaApiController: ControllerBase
     {
         if (villaId == 0)
         {
+            logger.LogError("Get villa error with id"+villaId);
             return BadRequest();
         }
 
@@ -52,7 +55,7 @@ public class VillaApiController: ControllerBase
         //     return BadRequest(ModelState);
         // }
 
-        if (VillaStore.villaList.FirstOrDefault(villa => villa.Name.ToUpper() == villa.Name.ToUpper()) != null)
+        if (VillaStore.villaList.FirstOrDefault(v => (v.Name).ToUpper() == villa.Name.ToUpper()) != null)
         {
             ModelState.AddModelError("CustomError", "Villa name already exists");
             return BadRequest(ModelState);
@@ -74,8 +77,6 @@ public class VillaApiController: ControllerBase
     }
 
 
-    
-    
     /*Endpoint to Delete Villa */
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -97,8 +98,8 @@ public class VillaApiController: ControllerBase
         VillaStore.villaList.Remove(vila);
         return NoContent();
     }
-    
-    
+
+
     /*Endpoint to Update Villa */
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -109,10 +110,37 @@ public class VillaApiController: ControllerBase
         {
             return BadRequest();
         }
-        var villa=VillaStore.villaList.FirstOrDefault(villa => villa.Id == id);
+
+        var villa = VillaStore.villaList.FirstOrDefault(villa => villa.Id == id);
         villa.Name = villaDto.Name;
         villa.Description = villaDto.Description;
         return NoContent();
     }
+
+
+    /*Endpoint to update villa in patch*/
+    [HttpPatch("{id:int}", Name = "UpdatePartialVilla")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public IActionResult UpdatePartialVilla(int id, JsonPatchDocument<VillaDTO> patch)
+    {
+        if (id == 0)
+        {
+            return BadRequest();
+        }
     
+        var villa = VillaStore.villaList.FirstOrDefault(villa => villa.Id == id);
+        if (villa == null)
+        {
+            return BadRequest();
+        }
+    
+        patch.ApplyTo(villa, ModelState);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+    
+        return NoContent();
+    }
 }

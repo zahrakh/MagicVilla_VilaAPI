@@ -4,9 +4,8 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 //add logger config
-Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File("log/villaLogs.txt",rollingInterval:RollingInterval.Day).CreateLogger();
-
-builder.Host.UseSerilog();
+// Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File("log/villaLogs.txt",rollingInterval:RollingInterval.Day).CreateLogger();
+// builder.Host.UseSerilog();
 
 builder.Services.AddControllersWithViews(option => { option.ReturnHttpNotAcceptable = true; })
     .AddNewtonsoftJson()

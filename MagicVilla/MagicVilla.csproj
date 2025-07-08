@@ -15,4 +15,12 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.1"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="log\villaLogs20250707.txt" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="log\" />
+    </ItemGroup>
+
 </Project>

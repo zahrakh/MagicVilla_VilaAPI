@@ -1,5 +1,6 @@
 //
 
+using MagicVilla.Logging;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,7 @@ builder.Services.AddControllersWithViews(option => { option.ReturnHttpNotAccepta
 
 // builder.Services.AddOpenApi();
 builder.Services.AddSwaggerGen();
-// Add services to the container.
+builder.Services.AddSingleton<ILogging,Logging>();
 
 var app = builder.Build();
 

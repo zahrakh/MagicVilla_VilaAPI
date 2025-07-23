@@ -30,8 +30,9 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<VillaDTO>>> GetVillas()
     {
+        IEnumerable<Villa> villaList = await _db.Villas.ToListAsync();
         _logget.Log("Get All the Villas", "Error");
-        return Ok(await _db.Villas.ToListAsync());
+        return Ok(_imapper.Map<List<VillaDTO>>(villaList));
     }
 
 
@@ -54,7 +55,7 @@ public class VillaApiController : ControllerBase
             return NotFound();
         }
 
-        return Ok(villa);
+        return Ok(_imapper.Map<VillaDTO>(villa));
     }
 
 
@@ -63,35 +64,23 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<VillaDTO>> CreateVilla([FromBody] VillaCreateDTO? villaDTO)
+    public async Task<ActionResult<VillaDTO>> CreateVilla([FromBody] VillaCreateDTO? createDto)
     {
-        // if (!ModelState.IsValid)
-        // {
-        //     return BadRequest(ModelState);
-        // }
-
-        if (await _db.Villas.FirstOrDefaultAsync(v => (v.Name).ToUpper() == villaDTO.Name.ToUpper()) != null)
+        if (await _db.Villas.FirstOrDefaultAsync(v => (v.Name).ToUpper() == createDto.Name.ToUpper()) != null)
         {
             ModelState.AddModelError("CustomError", "Villa name already exists");
             return BadRequest(ModelState);
         }
 
-        if (villaDTO == null)
+        if (createDto == null)
         {
-            return BadRequest(villaDTO);
+            return BadRequest(createDto);
         }
 
-        Villa model = new()
-        {
-            Name = villaDTO.Name,
-            Description = villaDTO.Description,
-            ImageUrl = villaDTO.ImageUrl,
-            Rate = villaDTO.Rate,
-            Amenity = villaDTO.Amenity,
-        };
-        await _db.Villas.AddAsync(model);
+        var villa = _imapper.Map<Villa>(createDto);
+        await _db.Villas.AddAsync(villa);
         await _db.SaveChangesAsync();
-        return CreatedAtRoute("GetVilla", new { villaId = model.Id }, model);
+        return CreatedAtRoute("GetVilla", new { villaId = villa.Id }, villa);
     }
 
 
@@ -123,23 +112,15 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPut("{id:int}", Name = "UpdateVilla")]
-    public async Task<ActionResult> UpdateVilla(int id, [FromBody] VillaUpdateDTO villaDto)
+    public async Task<ActionResult> UpdateVilla(int id, [FromBody] VillaUpdateDTO updateDto)
     {
-        if (villaDto.Id != id)
+        if (updateDto.Id != id)
         {
             return BadRequest();
         }
 
-        Villa model = new()
-        {
-            Id = villaDto.Id,
-            Name = villaDto.Name,
-            Description = villaDto.Description,
-            ImageUrl = villaDto.ImageUrl,
-            Rate = villaDto.Rate,
-            Amenity = villaDto.Amenity,
-        };
-        _db.Villas.Update(model);
+        var villa = _imapper.Map<Villa>(updateDto);
+        _db.Villas.Update(villa);
         await _db.SaveChangesAsync();
         return NoContent();
     }
@@ -162,27 +143,11 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        VillaUpdateDTO villaUpdateDTO = new()
-        {
-            Id = villa.Id,
-            Name = villa.Name,
-            Description = villa.Description,
-            ImageUrl = villa.ImageUrl,
-            Rate = villa.Rate,
-            Amenity = villa.Amenity,
-        };
+        VillaUpdateDTO villaUpdateDTO = _imapper.Map<VillaUpdateDTO>(villa);
 
         patch.ApplyTo(villaUpdateDTO, ModelState);
 
-        Villa model = new()
-        {
-            Id = villaUpdateDTO.Id,
-            Name = villaUpdateDTO.Name,
-            Description = villaUpdateDTO.Description,
-            ImageUrl = villaUpdateDTO.ImageUrl,
-            Rate = villaUpdateDTO.Rate,
-            Amenity = villaUpdateDTO.Amenity,
-        };
+        Villa model = _imapper.Map<Villa>(villaUpdateDTO);
         _db.Update(model);
         await _db.SaveChangesAsync();
         if (!ModelState.IsValid)

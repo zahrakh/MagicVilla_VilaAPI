@@ -1,3 +1,4 @@
+using AutoMapper;
 using MagicVilla.Data;
 using MagicVilla.Logging;
 using MagicVilla.Models;
@@ -15,11 +16,13 @@ public class VillaApiController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly ILogging _logget;
+    private readonly IMapper _imapper;
 
-    public VillaApiController(ApplicationDbContext db, ILogging logger)
+    public VillaApiController(ApplicationDbContext db, ILogging logger, IMapper mapper)
     {
         _logget = logger;
         _db = db;
+        _imapper = mapper;
     }
 
     /*Endpoint to get Villa List*/

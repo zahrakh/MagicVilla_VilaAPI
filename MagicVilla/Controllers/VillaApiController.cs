@@ -1,11 +1,11 @@
 using AutoMapper;
-using MagicVilla.Data;
 using MagicVilla.Logging;
 using MagicVilla.Models;
 using MagicVilla.Models.Dto;
+using MagicVilla.repository;
+using MagicVilla.repository.IRepository;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace MagicVilla.Controllers;
 
@@ -14,14 +14,14 @@ namespace MagicVilla.Controllers;
 [ApiController]
 public class VillaApiController : ControllerBase
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IVillaRepository repository;
     private readonly ILogging _logget;
     private readonly IMapper _imapper;
 
-    public VillaApiController(ApplicationDbContext db, ILogging logger, IMapper mapper)
+    public VillaApiController(IVillaRepository villaRepository, ILogging logger, IMapper mapper)
     {
         _logget = logger;
-        _db = db;
+        repository = villaRepository;
         _imapper = mapper;
     }
 
@@ -30,7 +30,7 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<VillaDTO>>> GetVillas()
     {
-        IEnumerable<Villa> villaList = await _db.Villas.ToListAsync();
+        IEnumerable<Villa> villaList = await repository.GetAllAsync();
         _logget.Log("Get All the Villas", "Error");
         return Ok(_imapper.Map<List<VillaDTO>>(villaList));
     }
@@ -49,7 +49,7 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villa = await _db.Villas.FirstOrDefaultAsync(villa => villa.Id == villaId);
+        var villa = await repository.GetAsync(villa => villa.Id == villaId);
         if (villa == null)
         {
             return NotFound();
@@ -66,7 +66,7 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<VillaDTO>> CreateVilla([FromBody] VillaCreateDTO? createDto)
     {
-        if (await _db.Villas.FirstOrDefaultAsync(v => (v.Name).ToUpper() == createDto.Name.ToUpper()) != null)
+        if (await repository.GetAsync(v => (v.Name).ToUpper() == createDto.Name.ToUpper()) != null)
         {
             ModelState.AddModelError("CustomError", "Villa name already exists");
             return BadRequest(ModelState);
@@ -78,8 +78,7 @@ public class VillaApiController : ControllerBase
         }
 
         var villa = _imapper.Map<Villa>(createDto);
-        await _db.Villas.AddAsync(villa);
-        await _db.SaveChangesAsync();
+        await repository.CreateAsync(villa);
         return CreatedAtRoute("GetVilla", new { villaId = villa.Id }, villa);
     }
 
@@ -96,14 +95,13 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var vila = await _db.Villas.FirstOrDefaultAsync(villa => villa.Id == villaId);
+        var vila = await repository.GetAsync(villa => villa.Id == villaId);
         if (vila == null)
         {
             return NotFound();
         }
 
-        _db.Villas.Remove(vila);
-        await _db.SaveChangesAsync();
+        await repository.RemoveAsync(vila);
         return NoContent();
     }
 
@@ -120,8 +118,7 @@ public class VillaApiController : ControllerBase
         }
 
         var villa = _imapper.Map<Villa>(updateDto);
-        _db.Villas.Update(villa);
-        await _db.SaveChangesAsync();
+        await repository.UpdateAsync(villa);
         return NoContent();
     }
 
@@ -137,7 +134,7 @@ public class VillaApiController : ControllerBase
             return BadRequest();
         }
 
-        var villa = await _db.Villas.AsNoTracking().FirstOrDefaultAsync(villa => villa.Id == id);
+        var villa = await repository.GetAsync(villa => villa.Id == id);
         if (villa == null)
         {
             return BadRequest();
@@ -148,8 +145,7 @@ public class VillaApiController : ControllerBase
         patch.ApplyTo(villaUpdateDTO, ModelState);
 
         Villa model = _imapper.Map<Villa>(villaUpdateDTO);
-        _db.Update(model);
-        await _db.SaveChangesAsync();
+        await repository.UpdateAsync(model);
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);

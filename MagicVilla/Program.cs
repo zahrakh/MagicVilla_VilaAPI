@@ -3,6 +3,8 @@
 using MagicVilla;
 using MagicVilla.Data;
 using MagicVilla.Logging;
+using MagicVilla.repository;
+using MagicVilla.repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -12,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // builder.Host.UseSerilog();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+builder.Services.AddScoped<IVillaRepository, VillaRepository>();
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddControllersWithViews(option => { option.ReturnHttpNotAcceptable = true; })
     .AddNewtonsoftJson()

@@ -1,67 +1,23 @@
-using System.Linq.Expressions;
 using MagicVilla.Data;
 using MagicVilla.Models;
-using MagicVilla.repository.IRepository;
-using Microsoft.EntityFrameworkCore;
+using MagicVilla.repository.InterfaceRepository;
 
 namespace MagicVilla.repository;
 
-public class VillaRepository : IVillaRepository
+public class VillaRepository:  Repository<Villa>, IVillaRepository
 {
     private readonly ApplicationDbContext _db;
 
-    public VillaRepository(ApplicationDbContext db)
+    public VillaRepository(ApplicationDbContext db):base(db)// to pass it to parent constructor
     {
         _db = db;
     }
 
-    public async Task<List<Villa>?> GetAllAsync(Expression<Func<Villa, bool>>? filter = null)
+    public async Task<Villa> UpdateAsync(Villa entity)
     {
-        IQueryable<Villa> query = _db.Villas;
-        if (filter != null)
-        {
-            query = query.Where(filter);
-        }
-
-        return await query.ToListAsync();
-    }
-
-    public async Task<Villa?> GetAsync(Expression<Func<Villa, bool>>? filter = null, bool track = true)
-    {
-        IQueryable<Villa> query = _db.Villas;
-        if (track)
-        {
-            query = query.AsNoTracking();
-        }
-
-        if (filter != null)
-        {
-            query = query.Where(filter);
-        }
-
-        return await query.FirstOrDefaultAsync();
-    }
-
-    public async Task CreateAsync(Villa entity)
-    {
-        await _db.Villas.AddAsync(entity);
-        await SaveAsync();
-    }
-
-    public async Task UpdateAsync(Villa entity)
-    {
+        entity.UpdatedDate = DateTime.Now;
         _db.Villas.Update(entity);
-        await SaveAsync();
-    }
-
-    public async Task RemoveAsync(Villa entity)
-    {
-        _db.Villas.Remove(entity);
-        await SaveAsync();
-    }
-
-    public async Task SaveAsync()
-    {
         await _db.SaveChangesAsync();
+        return entity;
     }
 }

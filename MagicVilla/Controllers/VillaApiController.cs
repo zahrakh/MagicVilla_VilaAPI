@@ -2,8 +2,7 @@ using AutoMapper;
 using MagicVilla.Logging;
 using MagicVilla.Models;
 using MagicVilla.Models.Dto;
-using MagicVilla.repository;
-using MagicVilla.repository.IRepository;
+using MagicVilla.repository.InterfaceRepository;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 

@@ -4,7 +4,7 @@ using MagicVilla;
 using MagicVilla.Data;
 using MagicVilla.Logging;
 using MagicVilla.repository;
-using MagicVilla.repository.IRepository;
+using MagicVilla.repository.InterfaceRepository;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 

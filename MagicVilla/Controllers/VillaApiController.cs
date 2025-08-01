@@ -38,6 +38,7 @@ public class VillaApiController : ControllerBase
             _logget.Log("Get All the Villas", "Error");
             _response.Result = _imapper.Map<List<VillaDTO>>(villaList);
             _response.Status = HttpStatusCode.OK;
+            _response.IsSuccess = true;
             return Ok(_response);
         }
         catch (Exception e)

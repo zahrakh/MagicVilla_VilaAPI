@@ -15,7 +15,7 @@ public class VillaRepository:  Repository<Villa>, IVillaRepository
 
     public async Task<Villa> UpdateAsync(Villa entity)
     {
-        entity.UpdatedDate = DateTime.Now;
+        entity.UpdatedDate = DateTime.UtcNow;
         _db.Villas.Update(entity);
         await _db.SaveChangesAsync();
         return entity;

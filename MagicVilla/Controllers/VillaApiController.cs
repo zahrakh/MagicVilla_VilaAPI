@@ -28,7 +28,7 @@ public class VillaApiController : ControllerBase
     }
 
     /*Endpoint to get Villa List*/
-    [HttpGet]
+    [HttpGet(Name = "GetAllVillas")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<APIResponse>> GetVillas()
     {
@@ -50,7 +50,7 @@ public class VillaApiController : ControllerBase
             };
         }
 
-        return _response;
+        return Ok(_response);
     }
 
 

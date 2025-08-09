@@ -11,7 +11,7 @@ public class BaseService : IBaseService
     public APIResponse ApiResponse { get; set; }
     public IHttpClientFactory ClientFactory { get; set; }
 
-    BaseService(IHttpClientFactory clientFactory)
+   public BaseService(IHttpClientFactory clientFactory)
     {
         ClientFactory = clientFactory;
         ApiResponse = new APIResponse();

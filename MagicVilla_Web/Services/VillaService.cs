@@ -14,14 +14,14 @@ public class VillaService : BaseService, IVillaService
         base(clientFactory) //how do we manage different url?
     {
         _clientFactory = clientFactory;
-        villaUrl = configuration["ServiceUrls:VillaAPI"];
+        villaUrl = configuration.GetValue<string>("ServiceUrls:VillaAPI");
     }
 
     public Task<T> GetAllSync<T>()
     {
         return SendAsync<T>(new APIRequest()
         {
-            ApiType = SD.ApiType.POST,
+            ApiType = SD.ApiType.GET,
             Url = villaUrl + "/api/villaAPI"
         });
     }
@@ -30,7 +30,7 @@ public class VillaService : BaseService, IVillaService
     {
         return SendAsync<T>(new APIRequest()
         {
-            ApiType = SD.ApiType.POST,
+            ApiType = SD.ApiType.GET,
             Url = villaUrl + "/api/villaAPI" + id
         });
     }

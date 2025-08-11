@@ -59,7 +59,7 @@ public class VillaService : BaseService, IVillaService
     {
         return SendAsync<T>(new APIRequest()
         {
-            ApiType = SD.ApiType.POST,
+            ApiType = SD.ApiType.DELETE,
             Url = villaUrl + "/api/VillaAPI/" + id
         });
     }

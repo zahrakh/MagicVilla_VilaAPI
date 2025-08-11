@@ -31,7 +31,7 @@ public class VillaService : BaseService, IVillaService
         return SendAsync<T>(new APIRequest()
         {
             ApiType = SD.ApiType.GET,
-            Url = villaUrl + "/api/villaAPI" + id
+            Url = villaUrl + "/api/villaAPI/" + id
         });
     }
 

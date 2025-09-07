@@ -2,7 +2,7 @@ using MagicVilla_Web.Models.Dto;
 
 namespace MagicVilla_Web.Services.IServices;
 
-interface IVillaNumberService
+public interface IVillaNumberService
 {
     Task<T> GetAllSync<T>();
     Task<T> GetSync<T>(int id);

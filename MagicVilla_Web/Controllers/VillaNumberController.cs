@@ -11,13 +11,10 @@ public class VillaNumberController : Controller
 {
     private readonly IVillaNumberService _villaNumberService;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
     
-    VillaNumberController(IVillaNumberService villaNumberService, IMapper mapper,
-        ILogger<VillaNumberController> logger) {
+    public VillaNumberController(IVillaNumberService villaNumberService, IMapper mapper) {
         _villaNumberService = villaNumberService;
         _mapper = mapper;
-        _logger = logger;
     }
 
     public async Task<IActionResult> IndexVillaNumber()

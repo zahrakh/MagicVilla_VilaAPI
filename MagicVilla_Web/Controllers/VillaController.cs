@@ -9,13 +9,13 @@ namespace MagicVilla_Web.Controllers;
 
 public class VillaController : Controller
 {
-    private readonly IVillaService villaService;
+    private readonly IVillaService _VillaService;
     private readonly IMapper mapper;
     private readonly ILogger logger;
 
     public VillaController(IVillaService villaService, IMapper mapper, ILogger<VillaController> logger)
     {
-        this.villaService = villaService;
+        this._VillaService = villaService;
         this.mapper = mapper;
         this.logger = logger;
     }
@@ -23,7 +23,7 @@ public class VillaController : Controller
     public async Task<IActionResult> IndexVilla()
     {
         List<VillaDTO> list = new List<VillaDTO>();
-        var response = await villaService.GetAllSync<APIResponse>();
+        var response = await _VillaService.GetAllSync<APIResponse>();
         if (response.IsSuccess)
         {
             list = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(response.Result));
@@ -43,7 +43,7 @@ public class VillaController : Controller
     {
         if (ModelState.IsValid)
         {
-            var response = await villaService.CrateSync<APIResponse>(model);
+            var response = await _VillaService.CrateSync<APIResponse>(model);
             if (response.IsSuccess)
             {
                 return RedirectToAction(nameof(IndexVilla));
@@ -56,7 +56,7 @@ public class VillaController : Controller
     public async Task<IActionResult> UpdateVilla(int villaId)
     {
         logger.Log(LogLevel.Information, villaId.ToString(), "Updating villa");
-        var response = await villaService.GetSync<APIResponse>(villaId);
+        var response = await _VillaService.GetSync<APIResponse>(villaId);
         if (response != null && response.IsSuccess)
         {
             VillaDTO model = JsonConvert.DeserializeObject<VillaDTO>(Convert.ToString(response.Result));
@@ -72,7 +72,7 @@ public class VillaController : Controller
     {
         if (ModelState.IsValid)
         {
-            var response = await villaService.UpdateSync<APIResponse>(model);
+            var response = await _VillaService.UpdateSync<APIResponse>(model);
             if (response.IsSuccess)
             {
                 return RedirectToAction(nameof(IndexVilla));
@@ -84,7 +84,7 @@ public class VillaController : Controller
 
     public async Task<IActionResult> DeleteVilla(int villaId)
     {
-        var response = await villaService.GetSync<APIResponse>(villaId);
+        var response = await _VillaService.GetSync<APIResponse>(villaId);
         if (response != null && response.IsSuccess)
         {
             VillaDTO model = JsonConvert.DeserializeObject<VillaDTO>(Convert.ToString(response.Result)!);
@@ -98,13 +98,12 @@ public class VillaController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteVilla(VillaDTO model)
     {
+        var response = await _VillaService.DeleteSync<APIResponse>(model.Id);
+        if (response.IsSuccess)
         {
-            var response = await villaService.DeleteSync<APIResponse>(model.Id);
-            if (response.IsSuccess)
-            {
-                return RedirectToAction(nameof(IndexVilla));
-            }
-            return View(model);
+            return RedirectToAction(nameof(IndexVilla));
         }
+
+        return View(model);
     }
 }

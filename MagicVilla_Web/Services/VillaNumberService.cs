@@ -5,23 +5,18 @@ using MagicVilla_Web.Services.IServices;
 
 namespace MagicVilla_Web.Services;
 
-public class VillaNumberService : BaseService, IVillaNumberService
+public class VillaNumberService(IHttpClientFactory clientFactory, IConfiguration configuration)
+    : BaseService(clientFactory), IVillaNumberService
 {
-    private readonly IHttpClientFactory _clientFactory;
-    private string? villaNumberUrl;
-
-    public VillaNumberService(IHttpClientFactory clientFactory, IConfiguration configuration) : base(clientFactory)
-    {
-        _clientFactory = clientFactory;
-        villaNumberUrl = configuration["ServiceUrls:VillaAPI"];
-    }
+    private readonly IHttpClientFactory _clientFactory = clientFactory;
+    private readonly string? _villaNumberUrl = configuration["ServiceUrls:VillaAPI"];
 
     public Task<T> GetAllSync<T>()
     {
         return SendAsync<T>(new APIRequest()
         {
             ApiType = SD.ApiType.GET,
-            Url = villaNumberUrl + "api/VillaNumber/"
+            Url = _villaNumberUrl + "/api/VillaNumber"
         });
     }
 
@@ -30,7 +25,7 @@ public class VillaNumberService : BaseService, IVillaNumberService
         return SendAsync<T>(new APIRequest()
         {
             ApiType = SD.ApiType.GET,
-            Url = villaNumberUrl + "api/VillaNumber/" + id
+            Url = _villaNumberUrl + "/api/VillaNumber/" + id
         });
     }
 
@@ -40,7 +35,7 @@ public class VillaNumberService : BaseService, IVillaNumberService
         {
             ApiType = SD.ApiType.POST,
             Data = villaNumber,
-            Url = villaNumberUrl + "api/VillaNumber/"
+            Url = _villaNumberUrl + "/api/VillaNumber"
         });
     }
 
@@ -50,7 +45,7 @@ public class VillaNumberService : BaseService, IVillaNumberService
         {
             ApiType = SD.ApiType.PUT,
             Data = villaNumber,
-            Url = villaNumberUrl + "api/VillaNumber/" + villaNumber.VillaNo
+            Url = _villaNumberUrl + "/api/VillaNumber/" + villaNumber.VillaNo
         });
     }
 
@@ -60,7 +55,7 @@ public class VillaNumberService : BaseService, IVillaNumberService
         {
             ApiType = SD.ApiType.DELETE,
             Data = villaNumber,
-            Url = villaNumberUrl + "api/VillaNumber/" + villaNumber
+            Url = _villaNumberUrl + "/api/VillaNumber/" + villaNumber
         });
     }
 }

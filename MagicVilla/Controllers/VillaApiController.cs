@@ -17,7 +17,7 @@ public class VillaApiController : ControllerBase
     private readonly IVillaRepository _repository;
     private readonly ILogging _logget;
     private readonly IMapper _imapper;
-    private APIResponse _response;
+    private APIResponse _response;//todo--> is it allowed to have one global response?
 
     public VillaApiController(IVillaRepository villaRepository, ILogging logger, IMapper mapper)
     {

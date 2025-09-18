@@ -31,7 +31,7 @@ public class VillaNumberController:ControllerBase
     {
         try
         {
-            IEnumerable<VillaNumber>? villaNumbers = await _repository.GetAllAsync();
+            IEnumerable<VillaNumber>? villaNumbers = await _repository.GetAllAsync(includeProperty:"Villa");
             _response.Result= _imapper.Map<IEnumerable<VillaNumber>>(villaNumbers);
             _response.Status = HttpStatusCode.OK;
             return Ok(_response);

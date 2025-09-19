@@ -17,10 +17,6 @@ html {
   min-height: 100%;
 }
 
-body {
-  margin-bottom: 60px;
-}
-
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;
@@ -28,4 +24,66 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
+}
+/* Navbar mint */
+.navbar {
+    background-color: #212529 !important;
+}
+
+/* Body off-white */
+body {
+    background-color: #F5F7F6 !important;
+}
+
+.custom-navbar {
+    background-color: #383a3a !important; /* mint green */
+}
+
+
+/*Gallery list theme*/
+/* Dark table container */
+.villa-list-container {
+    background-color: #1c1c1c; /* dark background for container */
+    color: #f8f9fa; /* white text */
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Dark table */
+.villa-list-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.villa-list-table thead {
+    background-color: #343a40; /* dark header */
+    color: #f8f9fa;
+}
+
+.villa-list-table th,
+.villa-list-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #495057;
+    color: #f8f9fa; /* white text for all cells */
+}
+
+.villa-list-table tbody tr {
+    background-color: #212529 !important; /* dark row */
+    color: #f8f9fa !important;
+}
+
+.villa-list-table tbody tr:hover {
+    background-color: #495057 !important; /* hover effect */
+}
+
+/* Buttons */
+.villa-list-table .btn {
+    border-radius: 5px;
+}
+
+/* Create button */
+.create-villa-btn {
+    font-weight: 500;
 }

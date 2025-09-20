@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using MagicVilla_Utility;
 using MagicVilla_Web.Models;
@@ -8,62 +10,69 @@ namespace MagicVilla_Web.Services;
 
 public class BaseService : IBaseService
 {
-    public APIResponse ApiResponse { get; set; }
-    public IHttpClientFactory ClientFactory { get; set; }
+    private readonly IHttpClientFactory _clientFactory;
 
-   public BaseService(IHttpClientFactory clientFactory)
+    public BaseService(IHttpClientFactory clientFactory)
     {
-        ClientFactory = clientFactory;
-        ApiResponse = new APIResponse();
+        _clientFactory = clientFactory;
     }
 
     public async Task<T> SendAsync<T>(APIRequest request)
     {
         try
         {
-            var client = ClientFactory.CreateClient("api");
-            HttpRequestMessage message = new HttpRequestMessage();
-            message.Headers.Add("accept", "application/json");
-            message.RequestUri = new Uri(request.Url);
-            if (request.Data != null)
-            {
-                message.Content = new StringContent(JsonConvert.SerializeObject(request.Data), Encoding.UTF8,
-                    "application/json");
-            }
+            var client = _clientFactory.CreateClient("api");
 
-            switch (request.ApiType)
+            using var message = new HttpRequestMessage
             {
-                case SD.ApiType.DELETE:
-                    message.Method = HttpMethod.Delete;
-                    break;
-                case SD.ApiType.PUT:
-                    message.Method = HttpMethod.Put;
-                    break;
-                case SD.ApiType.POST:
-                    message.Method = HttpMethod.Post;
-                    break;
-                default:
-                    message.Method = HttpMethod.Get;
-                    break;
-            }
-
-            HttpResponseMessage response = null;
-            response = await client.SendAsync(message);
-            var apiContent = await response.Content.ReadAsStringAsync();
-            var apiResponse = JsonConvert.DeserializeObject<T>(apiContent);
-            return apiResponse;
-        }
-        catch (Exception e)
-        {
-            var dto = new APIResponse()
-            {
-                ErrorMessages = [e.Message],
-                IsSuccess = false,
+                RequestUri = new Uri(request.Url),
+                Method = request.ApiType switch
+                {
+                    SD.ApiType.DELETE => HttpMethod.Delete,
+                    SD.ApiType.PUT    => HttpMethod.Put,
+                    SD.ApiType.POST   => HttpMethod.Post,
+                    _                 => HttpMethod.Get
+                }
             };
-            var res= JsonConvert.SerializeObject(dto);
-            var apiResponse = JsonConvert.DeserializeObject<T>(res);
-            return apiResponse;
+
+            message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            if (request.Data is not null)
+            {
+                message.Content = new StringContent(
+                    JsonConvert.SerializeObject(request.Data),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+            }
+
+            using var response = await client.SendAsync(message);
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Try to parse as APIResponse first
+            if (typeof(T) == typeof(APIResponse))
+            {
+                return JsonConvert.DeserializeObject<T>(content)!;
+            }
+
+            // Otherwise, try to parse directly into the requested type
+            return JsonConvert.DeserializeObject<T>(content)!;
         }
-        
+        catch (Exception ex)
+        {
+            // Handle exceptions gracefully with a default APIResponse
+            if (typeof(T) == typeof(APIResponse))
+            {
+                var errorResponse = new APIResponse
+                {
+                    ErrorMessages = new List<string> { ex.Message },
+                    IsSuccess = false,
+                    Status = HttpStatusCode.InternalServerError
+                };
+                return (T)(object)errorResponse;
+            }
+
+            throw; // rethrow if caller expected a custom DTO
+        }
     }
 }

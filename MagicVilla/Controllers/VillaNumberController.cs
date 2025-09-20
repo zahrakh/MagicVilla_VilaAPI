@@ -91,8 +91,12 @@ public class VillaNumberController:ControllerBase
         {
             if (await _repository.GetAsync(v => v.VillaNo == createDto.VillaNo) != null)
             {
-                ModelState.AddModelError("CustomError", "Villa name already exists");
+                ModelState.AddModelError("ErrorMessages", "Villa name already exists");
                 return BadRequest(ModelState);
+                //todo:
+                //what is the best way to handle the return response 
+                //1-return BadRequest(ModelState);
+                //2-return BadRequest(response(isSuccess=false)); how to return error message and wrong validation
             }
 
             if (createDto == null)
@@ -130,6 +134,7 @@ public class VillaNumberController:ControllerBase
             if (updateDto.VillaNo != villaNo)
             {
                 _response.Status = HttpStatusCode.BadRequest;
+                _response.IsSuccess = false;
                 return BadRequest(_response);
             }
             var villa= _imapper.Map<VillaNumber>(updateDto);

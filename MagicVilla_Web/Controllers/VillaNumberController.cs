@@ -93,7 +93,7 @@ public class VillaNumberController : Controller
         if (ModelState.IsValid)
         {
             var response = await _villaNumberService.UpdateSync<APIResponse>(model);
-            if (response.IsSuccess)
+            if (response is { IsSuccess: true, ErrorMessages.Count: 0 })
             {
                 return RedirectToAction(nameof(IndexVillaNumber));
             }

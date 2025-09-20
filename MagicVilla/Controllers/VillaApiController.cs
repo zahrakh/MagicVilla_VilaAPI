@@ -17,7 +17,7 @@ public class VillaApiController : ControllerBase
     private readonly IVillaRepository _repository;
     private readonly ILogging _logget;
     private readonly IMapper _imapper;
-    private APIResponse _response;//todo--> is it allowed to have one global response?
+    private APIResponse _response; //todo--> is it allowed to have one global response?
 
     public VillaApiController(IVillaRepository villaRepository, ILogging logger, IMapper mapper)
     {
@@ -35,7 +35,7 @@ public class VillaApiController : ControllerBase
         try
         {
             IEnumerable<Villa>? villaList = await _repository.GetAllAsync();
-            _logget.Log("Get All the Villas", "Error");
+            _logget.Log("Get All the Villas", "info");
             _response.Result = _imapper.Map<List<VillaDTO>>(villaList);
             _response.Status = HttpStatusCode.OK;
             _response.IsSuccess = true;

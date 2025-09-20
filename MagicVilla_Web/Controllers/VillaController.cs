@@ -57,13 +57,9 @@ public class VillaController : Controller
     {
         logger.Log(LogLevel.Information, villaId.ToString(), "Updating villa");
         var response = await _VillaService.GetSync<APIResponse>(villaId);
-        if (response != null && response.IsSuccess)
-        {
-            VillaDTO model = JsonConvert.DeserializeObject<VillaDTO>(Convert.ToString(response.Result));
-            return View(mapper.Map<VillaUpdateDTO>(model));
-        }
-
-        return NotFound();
+        if (!response.IsSuccess) return NotFound();
+        VillaDTO model = JsonConvert.DeserializeObject<VillaDTO>(Convert.ToString(response.Result));
+        return View(mapper.Map<VillaUpdateDTO>(model));
     }
 
     [HttpPost]
@@ -85,13 +81,9 @@ public class VillaController : Controller
     public async Task<IActionResult> DeleteVilla(int villaId)
     {
         var response = await _VillaService.GetSync<APIResponse>(villaId);
-        if (response != null && response.IsSuccess)
-        {
-            VillaDTO model = JsonConvert.DeserializeObject<VillaDTO>(Convert.ToString(response.Result)!);
-            return View(model);
-        }
-
-        return NotFound();
+        if (!response.IsSuccess) return NotFound();
+        VillaDTO model = JsonConvert.DeserializeObject<VillaDTO>(Convert.ToString(response.Result)!);
+        return View(model);
     }
 
     [HttpPost]

@@ -5,8 +5,8 @@
             <h1 class="text-light">Artwork List</h1>
         </div>
         <div class="col text-end pt-1">
-            <a asp-controller="Villa" asp-action="CreateVilla" class="btn btn-outline-primary create-villa-btn">
-                <i class="bi bi-plus-square-fill"></i> Create New Villa
+            <a asp-controller="VillaNumber" asp-action="CreateVillaNumber" class="btn btn-outline-primary create-villa-btn">
+                <i class="bi bi-plus-square-fill"></i> Create New Artwork
             </a>
         </div>
     </div>
@@ -15,8 +15,8 @@
         <thead>
         <tr>
             <th>Villa NO.</th>
-            <th>Villa Name</th>
-            <th>Rate</th>
+            <th>Villa ID</th>
+            <th>Details</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -25,8 +25,8 @@
         {
             <tr>
                 <td>@item.VillaNo</td>
-                <td>@item?.Villa?.Name</td>
-                <td>@item?.Villa?.Rate</td>
+                <td>@item.VillaID</td>
+                <td>@item.SpecialDetails</td>
                 <td>
                     <a asp-controller="VillaNumber" asp-action="UpdateVillaNumber" asp-route-id="@item.VillaNo"
                        class="btn btn-success">

@@ -42,19 +42,24 @@ public class VillaNumberController : Controller
         return View(list);
     }
 
-    public async Task<IActionResult> CreateVillaNumber() 
+    [HttpGet]
+    public async Task<IActionResult> CreateVillaNumber()
     {
-        VillaNumberCreateVM villaNumberVM = new();
+        var vm = new VillaNumberCreateVM();
         var response = await _villaService.GetAllSync<APIResponse>();
-        if (response.IsSuccess)
+
+        if (response.IsSuccess && response.Result != null)
         {
-            villaNumberVM.VillaList = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(response.Result)).Select(it=>new SelectListItem
-            {
-                Text = it.Name,
-                Value = it.Id.ToString()
-            });
+            vm.VillaList = JsonConvert
+                .DeserializeObject<List<VillaDTO>>(Convert.ToString(response.Result))
+                .Select(it => new SelectListItem
+                {
+                    Text = it.Name,
+                    Value = it.Id.ToString()
+                });
         }
-        return View(villaNumberVM);
+
+        return View(vm);
     }
 
     [HttpPost]
@@ -64,10 +69,28 @@ public class VillaNumberController : Controller
         if (ModelState.IsValid)
         {
             var response = await _villaNumberService.CreateSync<APIResponse>(model.VillaNumber);
-            if (response.IsSuccess)
+            if (response.IsSuccess && response.ErrorMessages.Count == 0)
             {
                 return RedirectToAction(nameof(IndexVillaNumber)); //Todo alternative syntax
             }
+            else
+            {
+                if (response.ErrorMessages.Count > 0)
+                {
+                    ModelState.AddModelError("ErrorMessages", response.ErrorMessages.FirstOrDefault());
+                }
+            }
+        }
+
+        var villaListResponse = await _villaService.GetAllSync<APIResponse>();
+        if (villaListResponse.IsSuccess)
+        {
+            model.VillaList = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(villaListResponse.Result))
+                .Select(it => new SelectListItem
+                {
+                    Text = it.Name,
+                    Value = it.Id.ToString()
+                });
         }
 
         return View(model);
@@ -93,7 +116,7 @@ public class VillaNumberController : Controller
         if (ModelState.IsValid)
         {
             var response = await _villaNumberService.UpdateSync<APIResponse>(model);
-            if (response is { IsSuccess: true, ErrorMessages.Count: 0 })
+            if (response.IsSuccess)
             {
                 return RedirectToAction(nameof(IndexVillaNumber));
             }

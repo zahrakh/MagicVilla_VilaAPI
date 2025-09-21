@@ -91,7 +91,7 @@ public class VillaNumberController:ControllerBase
         {
             if (await _repository.GetAsync(v => v.VillaNo == createDto.VillaNo) != null)
             {
-                ModelState.AddModelError("ErrorMessages", "Villa name already exists");
+                ModelState.AddModelError("ErrorMessages", "item already exists");
                 return BadRequest(ModelState);
                 //todo:
                 //what is the best way to handle the return response 

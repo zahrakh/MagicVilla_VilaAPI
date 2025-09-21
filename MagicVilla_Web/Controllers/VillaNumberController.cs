@@ -164,13 +164,13 @@ public class VillaNumberController : Controller
     public async Task<IActionResult> DeleteVillaNumber(int villaNo)
     {
         _logger.Log(LogLevel.Information, villaNo.ToString(), "Updating item");
-        VillaNumberUpdateVM vm = new();
+        VillaNumberDeleteVM vm = new();
 
         var response = await _villaNumberService.GetSync<APIResponse>(villaNo);
         if (response.IsSuccess && response != null)
         {
             VillaNumberDTO model = JsonConvert.DeserializeObject<VillaNumberDTO>(Convert.ToString(response.Result));
-            vm.VillaNumber = _mapper.Map<VillaNumberUpdateDTO>(model);
+            vm.VillaNumber = model;
 
             response = await _villaService.GetAllSync<APIResponse>();
             if (response.IsSuccess)
@@ -195,7 +195,7 @@ public class VillaNumberController : Controller
     public async Task<IActionResult> DeleteVillaNumber(VillaNumberDeleteVM model)
     {
         var response = await _villaNumberService.DeleteSync<APIResponse>(model.VillaNumber.VillaNo);
-        if (response.IsSuccess)
+        if (response!=null && response.IsSuccess)
         {
             return RedirectToAction(nameof(IndexVillaNumber));
         }

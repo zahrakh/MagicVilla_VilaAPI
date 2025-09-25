@@ -46,6 +46,7 @@ public class VillaController : Controller
             var response = await _VillaService.CrateSync<APIResponse>(model);
             if (response.IsSuccess)
             {
+                TempData["success"] = "Place created Successfully";
                 return RedirectToAction(nameof(IndexVilla));
             }
         }
@@ -71,6 +72,7 @@ public class VillaController : Controller
             var response = await _VillaService.UpdateSync<APIResponse>(model);
             if (response.IsSuccess)
             {
+                TempData["success"] = "Place Updated Successfully";
                 return RedirectToAction(nameof(IndexVilla));
             }
         }
@@ -93,9 +95,10 @@ public class VillaController : Controller
         var response = await _VillaService.DeleteSync<APIResponse>(model.Id);
         if (response.IsSuccess)
         {
+            TempData["success"] = "Place deleted Successfully";
             return RedirectToAction(nameof(IndexVilla));
         }
-
+        TempData["error"] = "Error encountered ";
         return View(model);
     }
 }

@@ -192,8 +192,8 @@ public class VillaNumberController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteVillaNumber(VillaNumberDeleteVM model)
-    {
+    public async Task<IActionResult> DeleteVillaNumber(VillaNumberDeleteVM model) 
+    {//todo Implement delete Api 
         var response = await _villaNumberService.DeleteSync<APIResponse>(model.VillaNumber.VillaNo);
         if (response!=null && response.IsSuccess)
         {

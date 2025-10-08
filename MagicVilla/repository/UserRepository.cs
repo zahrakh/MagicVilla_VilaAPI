@@ -1,4 +1,3 @@
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -11,27 +10,20 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace MagicVilla.repository;
 
-public class UserRepository:IUserRepository
+public class UserRepository(ApplicationDbContext db, IConfiguration configuration, IMapper mapper) : IUserRepository
 {
-    private readonly ApplicationDbContext _db;
-    private readonly IMapper _mapper;
-    private readonly string _secretKey;
+    private readonly string? _secretKey = configuration.GetSection("ApiSettings:Secret").Value;
 
-    public UserRepository(ApplicationDbContext db, IConfiguration configuration,IMapper mapper)
-    {
-        _db = db;
-        _mapper = mapper;
-        _secretKey= configuration.GetSection("ApiSettings:Secret").Value;
-    }
     public bool IsUniqueUser(string username)
     {
-         var user= _db.LocalUsers.FirstOrDefault(x=>x.UserName == username);
-         return user == null;
+        var user = db.LocalUsers.FirstOrDefault(x => x.UserName == username);
+        return user == null;
     }
 
-    public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDTO)
+    public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequestDto)
     {
-        var user= _db.LocalUsers.FirstOrDefault(u=>u.UserName.ToLower() == loginRequestDTO.UserName.ToLower() && u.Password == loginRequestDTO.Password);
+        var user = db.LocalUsers.FirstOrDefault(user =>
+            user.UserName.ToLower() == loginRequestDto.UserName.ToLower() && user.Password == loginRequestDto.Password);
         if (user == null)
         {
             return new LoginResponseDTO()
@@ -43,11 +35,9 @@ public class UserRepository:IUserRepository
         //todo
         //check real Senarios!
         //check syntax
-        
-        
         //generate JWT
-        var tokenHandler = new JwtSecurityTokenHandler(); 
-        var key= Encoding.ASCII.GetBytes(_secretKey);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_secretKey);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity([
@@ -55,28 +45,29 @@ public class UserRepository:IUserRepository
                 new Claim(ClaimTypes.Role, user.Role)
             ]),
             Expires = DateTime.UtcNow.AddDays(7),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            SigningCredentials =
+                new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        LoginResponseDTO loginResponseDTO = new LoginResponseDTO()
+        LoginResponseDTO loginResponseDto = new LoginResponseDTO()
         {
             Token = tokenHandler.WriteToken(token),
-            User = _mapper.Map<UserDTO>(user)
+            User = mapper.Map<UserDTO>(user)
         };
-        return loginResponseDTO;
+        return loginResponseDto;
     }
 
-    public async Task<LocalUser> Register(RegisterationRequestDTO registerationRequestDTO)
+    public async Task<LocalUser?> Register(RegistrationRequestDTO registrationRequestDto)
     {
         LocalUser user = new()
         {
-             UserName = registerationRequestDTO.UserName,
-             Password = registerationRequestDTO.Password,
-             Name = registerationRequestDTO.Name,
-             Role = registerationRequestDTO.Role,
+            UserName = registrationRequestDto.UserName,
+            Password = registrationRequestDto.Password,
+            Name = registrationRequestDto.Name,
+            Role = registrationRequestDto.Role,
         };
-        _db.LocalUsers.Add(user);
-        await _db.SaveChangesAsync();
+        db.LocalUsers.Add(user);
+        await db.SaveChangesAsync();
         user.Password = ""; //todo check the all way to handle login system
         return user;
     }

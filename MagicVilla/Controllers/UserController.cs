@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MagicVilla.Controllers;
 
-[Route("api/UserAuth")]
+[Route("api/UsersAuth")]
 [ApiController]
 public class UserController(IUserRepository userRepository) : Controller
 {
     private APIResponse _response = new();
 
 
-    [HttpPost]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDto)
     {
         var loginResponse = await userRepository.Login(loginRequestDto);
@@ -32,7 +32,7 @@ public class UserController(IUserRepository userRepository) : Controller
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterationRequestDTO model)
+    public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
     {
         bool ifUserNameUnique = userRepository.IsUniqueUser(model.UserName);
         if (!ifUserNameUnique)

@@ -1,7 +1,9 @@
 using AutoMapper;
+using MagicVilla_Utility;
 using MagicVilla_Web.Models;
 using MagicVilla_Web.Models.Dto;
 using MagicVilla_Web.Services.IServices;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -31,7 +33,19 @@ public class AuthController : Controller
     [ValidateAntiForgeryToken] //todo--> what is it for?
     public async Task<IActionResult> Login(LoginRequestDTO loginRequestDto)
     {
-        return View(loginRequestDto);
+        APIResponse response = await _authService.LoginAsync<APIResponse>(loginRequestDto);
+        if (response != null && response.IsSuccess)
+        {
+            LoginResponseDTO loginResponseDto = JsonConvert.DeserializeObject<LoginResponseDTO>(Convert.ToString(response.Result)); 
+            HttpContext.Session.SetString(SD.SessionToken,loginResponseDto?.Token); 
+            return RedirectToAction("Index", "Home");
+        }
+        else
+        {
+            ModelState.AddModelError("ErrorMessages", "Invalid login attempt.");
+            return View(loginRequestDto);
+        }
+      
     }
 
     [HttpGet]
@@ -42,24 +56,26 @@ public class AuthController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult>Register(RegistrationRequestDTO registrationRequestDto)
+    public async Task<ActionResult> Register(RegistrationRequestDTO registrationRequestDto)
     {
-        APIResponse result= await _authService.RegisterAsync<APIResponse>(registrationRequestDto);
-        if (result.IsSuccess && result!=null)
+        APIResponse result = await _authService.RegisterAsync<APIResponse>(registrationRequestDto);
+        if (result.IsSuccess && result != null)
         {
-           RedirectToAction("Login"); 
+            RedirectToAction("Login");
         }
+
         return View(registrationRequestDto);
     }
 
     public async Task<IActionResult> Logout()
     {
-        return View();
+       await HttpContext.SignOutAsync();
+       HttpContext.Session.SetString(SD.SessionToken,""); 
+       return RedirectToAction("Index", "Home");
     }
 
     public IActionResult AccessDenied()
     {
         return View();
     }
- 
 }

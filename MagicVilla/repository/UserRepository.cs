@@ -52,7 +52,7 @@ public class UserRepository(ApplicationDbContext db, IConfiguration configuratio
         LoginResponseDTO loginResponseDto = new LoginResponseDTO()
         {
             Token = tokenHandler.WriteToken(token),
-            User = mapper.Map<UserDTO>(user)
+            User = mapper.Map<LocalUserDTO>(user)
         };
         return loginResponseDto;
     }

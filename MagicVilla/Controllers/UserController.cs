@@ -10,50 +10,49 @@ namespace MagicVilla.Controllers;
 [ApiController]
 public class UserController(IUserRepository userRepository) : Controller
 {
-    private APIResponse _response = new();
-
-
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequestDto)
     {
+        var response = new APIResponse();
         var loginResponse = await userRepository.Login(loginRequestDto);
         if (loginResponse.User == null || string.IsNullOrEmpty(loginResponse.Token))
         {
-            _response.ErrorMessages.Add("Username or Password is incorrect");
-            _response.IsSuccess = false;
-            _response.Status = HttpStatusCode.BadRequest;
-            return BadRequest(_response);
+            response.ErrorMessages.Add("Username or Password is incorrect");
+            response.IsSuccess = false;
+            response.Status = HttpStatusCode.BadRequest;
+            return BadRequest(response);
         }
 
-        _response.IsSuccess = true;
-        _response.Status = HttpStatusCode.OK;
-        _response.Result = loginResponse;
-        return Ok(_response);
+        response.IsSuccess = true;
+        response.Status = HttpStatusCode.OK;
+        response.Result = loginResponse;
+        return Ok(response);
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegistrationRequestDTO model)
     {
+        var response = new APIResponse();
         bool ifUserNameUnique = userRepository.IsUniqueUser(model.UserName);
         if (!ifUserNameUnique)
         {
-            _response.Status = HttpStatusCode.BadRequest;
-            _response.IsSuccess = false;
-            _response.ErrorMessages.Add("Username already exists");
-            return BadRequest(_response);
+            response.Status = HttpStatusCode.BadRequest;
+            response.IsSuccess = false;
+            response.ErrorMessages.Add("Username already exists");
+            return BadRequest(response);
         }
 
         var user = await userRepository.Register(model);
         if (user == null)
         {
-            _response.Status = HttpStatusCode.BadRequest;
-            _response.IsSuccess = false;
-            _response.ErrorMessages.Add("Error while registering");
-            return BadRequest(_response);
+            response.Status = HttpStatusCode.BadRequest;
+            response.IsSuccess = false;
+            response.ErrorMessages.Add("Error while registering");
+            return BadRequest(response);
         }
 
-        _response.Status = HttpStatusCode.OK;
-        _response.IsSuccess = true;
-        return Ok(_response);
+        response.Status = HttpStatusCode.OK;
+        response.IsSuccess = true;
+        return Ok(response);
     }
 }

@@ -17,14 +17,12 @@ public class VillaApiController : ControllerBase
     private readonly IVillaRepository _repository;
     private readonly ILogging _logget;
     private readonly IMapper _imapper;
-    private APIResponse _response; //todo--> is it allowed to have one global response? its not allowed 
 
     public VillaApiController(IVillaRepository villaRepository, ILogging logger, IMapper mapper)
     {
         _logget = logger;
         _repository = villaRepository;
         _imapper = mapper;
-        _response = new APIResponse();
     }
 
     /*Endpoint to get Villa List*/
@@ -33,25 +31,26 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<APIResponse>> GetVillas()
     {
+        var response = new APIResponse();
         try
         {
             IEnumerable<Villa>? villaList = await _repository.GetAllAsync();
             _logget.Log("Get All the Villas", "info");
-            _response.Result = _imapper.Map<List<VillaDTO>>(villaList);
-            _response.Status = HttpStatusCode.OK;
-            _response.IsSuccess = true;
-            return Ok(_response);
+            response.Result = _imapper.Map<List<VillaDTO>>(villaList);
+            response.Status = HttpStatusCode.OK;
+            response.IsSuccess = true;
+            return Ok(response);
         }
         catch (Exception e)
         {
-            _response.IsSuccess = false;
-            _response.ErrorMessages = new List<string>()
+            response.IsSuccess = false;
+            response.ErrorMessages = new List<string>()
             {
                 e.Message
             };
         }
 
-        return Ok(_response);
+        return Ok(response);
     }
 
 
@@ -62,36 +61,37 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<APIResponse>> GetVilla(int villaId)
     {
+        var response = new APIResponse();
         try
         {
             if (villaId == 0)
             {
                 _logget.Log("Get villa error with id" + villaId, "Info");
-                _response.Status = HttpStatusCode.BadRequest;
-                return BadRequest(_response);
+                response.Status = HttpStatusCode.BadRequest;
+                return BadRequest(response);
             }
 
             var villa = await _repository.GetAsync(villa => villa.Id == villaId);
             if (villa == null)
             {
-                _response.Status = HttpStatusCode.NotFound;
-                return NotFound(_response);
+                response.Status = HttpStatusCode.NotFound;
+                return NotFound(response);
             }
 
-            _response.Result = _imapper.Map<VillaDTO>(villa);
-            _response.Status = HttpStatusCode.OK;
-            return Ok(_response);
+            response.Result = _imapper.Map<VillaDTO>(villa);
+            response.Status = HttpStatusCode.OK;
+            return Ok(response);
         }
         catch (Exception e)
         {
-            _response.IsSuccess = false;
-            _response.ErrorMessages = new List<string>()
+            response.IsSuccess = false;
+            response.ErrorMessages = new List<string>()
             {
                 e.Message
             };
         }
 
-        return _response;
+        return response;
     }
 
 
@@ -102,6 +102,7 @@ public class VillaApiController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<APIResponse>> CreateVilla([FromBody] VillaCreateDTO? createDto)
     {
+        var response = new APIResponse();
         try
         {
             if (await _repository.GetAsync(v => (v.Name).ToUpper() == createDto.Name.ToUpper()) != null)
@@ -117,20 +118,20 @@ public class VillaApiController : ControllerBase
 
             var villa = _imapper.Map<Villa>(createDto);
             await _repository.CreateAsync(villa);
-            _response.Result = _imapper.Map<VillaDTO>(villa);
-            _response.Status = HttpStatusCode.Created;
+            response.Result = _imapper.Map<VillaDTO>(villa);
+            response.Status = HttpStatusCode.Created;
             return CreatedAtRoute("GetVilla", new { villaId = villa.Id }, villa);
         }
         catch (Exception e)
         {
-            _response.IsSuccess = false;
-            _response.ErrorMessages = new List<string>()
+            response.IsSuccess = false;
+            response.ErrorMessages = new List<string>()
             {
                 e.Message
             };
         }
 
-        return _response;
+        return response;
     }
 
 
@@ -141,6 +142,7 @@ public class VillaApiController : ControllerBase
     [HttpDelete("{villaId:int}", Name = "DeleteVilla")]
     public async Task<ActionResult<APIResponse>> DeleteVilla(int villaId)
     {
+        var response = new APIResponse();
         try
         {
             if (villaId == 0)
@@ -155,17 +157,17 @@ public class VillaApiController : ControllerBase
             }
 
             await _repository.RemoveAsync(vila);
-            _response.Status = HttpStatusCode.NoContent;
-            _response.IsSuccess = true;
-            return Ok(_response);
+            response.Status = HttpStatusCode.NoContent;
+            response.IsSuccess = true;
+            return Ok(response);
         }
         catch (Exception e)
         {
-            _response.IsSuccess = false;
-            _response.ErrorMessages = [e.Message];
+            response.IsSuccess = false;
+            response.ErrorMessages = [e.Message];
         }
 
-        return _response;
+        return response;
     }
 
 
@@ -175,27 +177,28 @@ public class VillaApiController : ControllerBase
     [HttpPut("{id:int}", Name = "UpdateVilla")]
     public async Task<ActionResult<APIResponse>> UpdateVilla(int id, [FromBody] VillaUpdateDTO updateDto)
     {
+        var response = new APIResponse();
         try
         {
             if (updateDto.Id != id)
             {
-                _response.Status = HttpStatusCode.BadRequest;
-                return BadRequest(_response);
+                response.Status = HttpStatusCode.BadRequest;
+                return BadRequest(response);
             }
 
             var villa = _imapper.Map<Villa>(updateDto);
             await _repository.UpdateAsync(villa);
-            _response.Status = HttpStatusCode.NoContent;
-            _response.IsSuccess = true;
-            return Ok(_response);
+            response.Status = HttpStatusCode.NoContent;
+            response.IsSuccess = true;
+            return Ok(response);
         }
         catch (Exception e)
         {
-            _response.IsSuccess = false;
-            _response.ErrorMessages = [e.Message];
+            response.IsSuccess = false;
+            response.ErrorMessages = [e.Message];
         }
 
-        return _response;
+        return response;
     }
 
 

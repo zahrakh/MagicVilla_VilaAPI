@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: magicvilla-postgres
+    environment:
+      POSTGRES_DB: MajicVilla
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Apple
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d MajicVilla"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  magicvilla-api:
+    build:
+      context: .
+      dockerfile: MagicVilla/Dockerfile
+    container_name: magicvilla-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=MajicVilla;Username=postgres;Password=Apple
+      ApiSettings__Secret: THIS IS USED TO SIGN AND VERIFY JWT TOKENS, REPLACE IT WITH YOUR OWN SECRET
+    ports:
+      - "5094:8080"
+
+  magicvilla-web:
+    build:
+      context: .
+      dockerfile: MagicVilla_Web/Dockerfile
+    container_name: magicvilla-web
+    depends_on:
+      - magicvilla-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ServiceUrls__VillaAPI: http://magicvilla-api:8080
+    ports:
+      - "5001:8080"
+
+volumes:
+  pgdata:

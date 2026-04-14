@@ -70,7 +70,7 @@ public class VillaController : Controller
         if (ModelState.IsValid)
         {
             var response = await _VillaService.UpdateSync<APIResponse>(model);
-            if (response.IsSuccess)
+            if ( response!=null && response.IsSuccess )
             {
                 TempData["success"] = "Place Updated Successfully";
                 return RedirectToAction(nameof(IndexVilla));

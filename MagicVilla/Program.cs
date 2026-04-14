@@ -7,10 +7,12 @@ using MagicVilla.repository.InterfaceRepository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddResponseCaching();
 // Add DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -47,6 +49,10 @@ builder.Services.AddAuthentication(options =>
 // Controllers + formatters
 builder.Services.AddControllersWithViews(options =>
 {
+    options.CacheProfiles.Add("default",new CacheProfile()
+    {
+        Duration = 60
+    });
     options.ReturnHttpNotAcceptable = true;
 })
 .AddNewtonsoftJson()
@@ -92,6 +98,15 @@ builder.Services.AddSingleton<ILogging, Logging>();
 
 var app = builder.Build();
 
+if (builder.Environment.EnvironmentName != "Testing")
+{
+    using var scope = app.Services.CreateScope();
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+    }
+}
+
 // Example endpoint
 app.MapGet("/", (ApplicationDbContext db) => db.Villas.ToList());
 
@@ -102,7 +117,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") != "true")
+{
+    app.UseHttpsRedirection();
+}
 
 // Order matters: authentication before authorization
 app.UseAuthentication();
@@ -115,3 +133,5 @@ app.Run();
 //add logger config
 // Log.Logger = new LoggerConfiguration().MinimumLevel.Debug().WriteTo.File("log/villaLogs.txt",rollingInterval:RollingInterval.Day).CreateLogger();
 // builder.Host.UseSerilog();
+
+public partial class Program { }
